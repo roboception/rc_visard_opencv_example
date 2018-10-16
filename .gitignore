@@ -1,0 +1,10 @@
+build
+*build*
+
+*~
+*.swp
+
+.*
+!.gitignore
+!.gitlab-ci.yml
+!.gitmodules
