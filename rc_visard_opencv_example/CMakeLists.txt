@@ -34,6 +34,8 @@
 find_package(OpenCV REQUIRED COMPONENTS core)
 find_package(RC_GENICAM_API 2.0 REQUIRED)
 
+message(STATUS "Found OpenCV version ${OpenCV_VERSION}")
+
 link_directories(${RC_GENICAM_API_LIBRARY_DIRS})
 
 file(GLOB_RECURSE SOURCES "*.cc")
