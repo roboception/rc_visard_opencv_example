@@ -35,6 +35,8 @@
 find_package(OpenCV REQUIRED COMPONENTS highgui imgproc)
 find_package(RC_GENICAM_API REQUIRED)
 
+link_directories(${RC_GENICAM_API_LIBRARY_DIRS})
+
 add_executable(rc_visard_show_streams
   rc_visard_show_streams.cc
   )
@@ -47,6 +49,7 @@ target_include_directories(rc_visard_show_streams
 target_link_libraries(rc_visard_show_streams
   rc_visard_opencv_example
   ${OpenCV_LIBRARIES}
+  ${RC_GENICAM_API_LIBRARIES}
   )
 
 install(TARGETS rc_visard_show_streams EXPORT PROJECTTargets COMPONENT bin DESTINATION bin)

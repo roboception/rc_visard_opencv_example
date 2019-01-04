@@ -303,3 +303,9 @@ std::unique_ptr<ImageSet> GcReceiver::receive(std::chrono::milliseconds timeout)
 
   return {};
 }
+
+const std::shared_ptr<GENAPI_NAMESPACE::CNodeMapRef>
+GcReceiver::getNodeMap() const
+{
+  return nodemap_;
+}

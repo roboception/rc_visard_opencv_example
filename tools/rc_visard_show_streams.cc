@@ -36,6 +36,8 @@
 #include <rc_visard_opencv_example/gc_cleaner.h>
 #include <rc_visard_opencv_example/gc_receiver.h>
 
+#include <rc_genicam_api/config.h>
+
 #if CV_MAJOR_VERSION == 2
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -68,6 +70,8 @@ bool error = false;
 
 bool synchronize_data = false;
 
+int frame_rate = 0;
+
 // command line flags
 std::map<std::string, bool *> flags
     {
@@ -94,6 +98,19 @@ bool parseArguments(int argc, char **argv)
     if (flag != flags.end())
     {
       *flag->second = true;
+    }
+    else if (std::string(argv[i]).find("--frame-rate=") == 0)
+    {
+      const std::string f_str = std::string(argv[i]).substr(13);
+      try
+      {
+        frame_rate = std::stoi(f_str);
+      }
+      catch (const std::exception &)
+      {
+        std::cerr << "Value of frame rate is no number" << std::endl;
+        return false;
+      }
     }
     else
     {
@@ -124,11 +141,12 @@ int main(int argc, char **argv)
 
   if (!parseArguments(argc, argv))
   {
-    std::cerr << "Usage: " << argv[0] << "[options] <device id>\n";
+    std::cerr << "Usage: " << argv[0] << " [options] <device id>\n";
     for (const auto &s : flags)
     {
-      std::cerr << "\t" << s.first << '\n';
+      std::cerr << '\t' << s.first << '\n';
     }
+    std::cerr << '\t' << "--frame-rate=<n>" << '\n';
     return 1;
   }
 
@@ -185,6 +203,17 @@ int main(int argc, char **argv)
   {
     std::cerr << "Could not initialize flags" << std::endl;
     return 1;
+  }
+
+  // set frame rate if requested
+  if (frame_rate > 0)
+  {
+    if (!rcg::setFloat(gc_receiver.getNodeMap(), "AcquisitionFrameRate",
+                       frame_rate, false))
+    {
+      std::cerr << "Could not set frame rate" << std::endl;
+      return 1;
+    }
   }
 
   std::cout

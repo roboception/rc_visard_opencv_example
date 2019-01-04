@@ -142,6 +142,8 @@ class GcReceiver
      */
     std::unique_ptr<ImageSet> receive(std::chrono::milliseconds timeout);
 
+    const std::shared_ptr<GENAPI_NAMESPACE::CNodeMapRef> getNodeMap() const;
+
   private:
     const std::string device_name_;
     const bool synchronize_data_;
