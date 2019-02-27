@@ -369,7 +369,7 @@ std::unique_ptr<DisparityReceiver> DisparityReceiver::enableAndMake(
   }
 
   // construct a template disparity image containing the camera parameters
-  DisparityImage image_template({}, {}, f, t, c_x, c_y);
+  DisparityImage image_template({}, {}, t, f, c_x, c_y);
 
   return std::unique_ptr<DisparityReceiver>(
       new DisparityReceiver(coord_scale, coord_inv, std::move(image_template)));
