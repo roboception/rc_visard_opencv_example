@@ -36,8 +36,6 @@ find_package(RC_GENICAM_API 2.0 REQUIRED)
 
 message(STATUS "Found OpenCV version ${OpenCV_VERSION}")
 
-link_directories(${RC_GENICAM_API_LIBRARY_DIRS})
-
 file(GLOB_RECURSE SOURCES "*.cc")
 file(GLOB_RECURSE HEADERS "*.h")
 file(GLOB_RECURSE PUBLIC_HEADERS "../include/rc_visard_opencv_example/*.h")
@@ -51,16 +49,11 @@ add_library(${LIBRARY_NAME} SHARED
   ${CMAKE_CURRENT_BINARY_DIR}/project_version.cc
   )
 
-target_include_directories(${LIBRARY_NAME}
-  PRIVATE
-  ${RC_GENICAM_API_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS})
-
 target_link_libraries(${LIBRARY_NAME}
   PRIVATE
-  ${RC_GENICAM_API_LIBRARIES}
+  rc_genicam_api::rc_genicam_api
   PUBLIC
-  ${OpenCV_LIBRARIES}
+  opencv_core
   )
 
 install(TARGETS ${LIBRARY_NAME} EXPORT PROJECTTargets COMPONENT bin

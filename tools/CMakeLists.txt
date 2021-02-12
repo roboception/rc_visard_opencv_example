@@ -41,15 +41,11 @@ add_executable(rc_visard_show_streams
   rc_visard_show_streams.cc
   )
 
-target_include_directories(rc_visard_show_streams
-  PRIVATE
-  ${RC_GENICAM_API_INCLUDE_DIRS}
-  )
-
 target_link_libraries(rc_visard_show_streams
   rc_visard_opencv_example
-  ${OpenCV_LIBRARIES}
-  ${RC_GENICAM_API_LIBRARIES}
+  opencv_highgui
+  opencv_imgproc
+  rc_genicam_api::rc_genicam_api
   )
 
 install(TARGETS rc_visard_show_streams EXPORT PROJECTTargets COMPONENT bin DESTINATION bin)
