@@ -56,7 +56,7 @@
 struct ImageReceiverFactoryCmp
 {
   bool operator()(const ImageReceiverFactory::ConstPtr &lhs,
-                  const ImageReceiverFactory::ConstPtr &rhs)
+                  const ImageReceiverFactory::ConstPtr &rhs) const
   {
     if (!lhs && rhs) { return true; }
     if (!rhs) { return false; }
