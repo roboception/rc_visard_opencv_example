@@ -1,9 +1,10 @@
 before_script:
+  - apt-get update -yq && apt-get install -y curl lsb-release lintian
   - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
   - echo "deb http://apt.roboception.de/stable $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-stable.list
   - if [ "$TESTING_DEBS" = "true" ]; then echo "deb http://apt.roboception.de/testing $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-testing.list ; fi
   - curl http://apt.roboception.de/archive.key | apt-key add -
-  - apt-get update -yq && apt-get install -y lintian rc-genicam-api
+  - apt-get update -yq && apt-get install -y rc-genicam-api
   - if [ "$DISTRO_CODENAME" == "bionic" ]; then DEBIAN_FRONTEND=noninteractive apt-get install -y libopencv-dev; else apt-get install -y ros-${ROS_DISTRO}-opencv3; fi
 
 variables:
