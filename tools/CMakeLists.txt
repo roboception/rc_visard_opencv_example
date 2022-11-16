@@ -48,4 +48,7 @@ target_link_libraries(rc_visard_show_streams
   rc_genicam_api::rc_genicam_api
   )
 
+  target_compile_features(rc_visard_show_streams PUBLIC cxx_std_11)
+
+
 install(TARGETS rc_visard_show_streams EXPORT PROJECTTargets COMPONENT bin DESTINATION bin)

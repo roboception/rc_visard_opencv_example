@@ -56,6 +56,8 @@ target_link_libraries(${LIBRARY_NAME}
   opencv_core
   )
 
+target_compile_features(${LIBRARY_NAME} PUBLIC cxx_std_11)
+
 install(TARGETS ${LIBRARY_NAME} EXPORT PROJECTTargets COMPONENT bin
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib

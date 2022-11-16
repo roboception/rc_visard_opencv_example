@@ -1,11 +1,11 @@
 before_script:
+  - export DEBIAN_FRONTEND=noninteractive
   - apt-get update -yq && apt-get install -y curl lsb-release lintian
   - export DISTRO_CODENAME=`lsb_release -cs` && echo Using distro $DISTRO_CODENAME
   - echo "deb http://apt.roboception.de/stable $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-stable.list
   - if [ "$TESTING_DEBS" = "true" ]; then echo "deb http://apt.roboception.de/testing $DISTRO_CODENAME main" > /etc/apt/sources.list.d/roboception-testing.list ; fi
   - curl http://apt.roboception.de/archive.key | apt-key add -
-  - apt-get update -yq && apt-get install -y rc-genicam-api
-  - if [ "$DISTRO_CODENAME" == "bionic" ]; then DEBIAN_FRONTEND=noninteractive apt-get install -y libopencv-dev; else apt-get install -y ros-${ROS_DISTRO}-opencv3; fi
+  - apt-get update -yq && apt-get install -y libopencv-dev rc-genicam-api
 
 variables:
   GET_SOURCES_ATTEMPTS: 3
@@ -14,7 +14,19 @@ variables:
 # Templates using anchors
 #########################
 .amd64_bionic_t: &amd64_bionic_job
-  image: ros:melodic-perception
+  image: registry.roboception.de/tools/docker_images:bionic-buildimage
+  tags:
+    - amd64
+    - docker
+
+.amd64_focal_t: &amd64_focal_job
+  image: registry.roboception.de/tools/docker_images:focal-buildimage
+  tags:
+    - amd64
+    - docker
+
+.amd64_jammy_t: &amd64_jammy_job
+  image: registry.roboception.de/tools/docker_images:jammy-buildimage
   tags:
     - amd64
     - docker
@@ -30,62 +42,11 @@ variables:
     - make -j 4
     - CTEST_OUTPUT_ON_FAILURE=1 make test
 
-# run test script with latest debs from testing installed
-.test_latest:
-  extends: .test
-  variables:
-    TESTING_DEBS: "true"
-
-# run test script with released debs from stable installed (allowed to fail)
-.test_stable:
-  extends: .test
-  allow_failure: true
-  except:
-    - /^v[0-9]+\.[0-9]+\.[0-9]+/
-
-# run test script with released debs from stable (only for releases, mustn't fail)
-.test_release:
-  extends: .test
-  only:
-    - /^v[0-9]+\.[0-9]+\.[0-9]+/
-  except:
-    - branches
-
-# Debian packaging
-.package:
-  stage: deploy
-  script:
-    - mkdir build && cd build
-    - cmake ..
-    - make -j 4
-    - make package
-    - if [ -z "$APT_REPO" ]; then export APT_REPO=testing; fi
-    - upload_deb.sh $DISTRO_CODENAME-$APT_REPO *.deb
-
-.package_testing:
-  extends: .package
-  only:
-    - master
-  except:
-    - tags
-  variables:
-    TESTING_DEBS: "true"
-    APT_REPO: "testing"
-
-.package_stable:
-  extends: .package
-  only:
-    - /^v[0-9]+\.[0-9]+\.[0-9]+/
-  except:
-    - branches
-  variables:
-    APT_REPO: "stable"
-
 ##############
 #### Jobs ####
 ##############
 gen_dox:
-  <<: *amd64_bionic_job
+  <<: *amd64_focal_job
   variables:
     TESTING_DEBS: "true"
   stage: deploy
@@ -101,40 +62,14 @@ gen_dox:
   tags:
     - docs
 
-################
-# Testing builds
-################
-
-# Test against latest (on every commit)
-#######################################
 test:bionic:amd64:
   <<: *amd64_bionic_job
-  extends: .test_latest
+  extends: .test
 
-# Test against stable (is allowed to fail)
-##########################################
-test_stable:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .test_stable
+test:focal:amd64:
+  <<: *amd64_focal_job
+  extends: .test
 
-# Deploy testing (only on master)
-#################################
-package_testing:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .package_testing
-
-################
-# Stable builds
-################
-
-# Test against stable if it is a release
-########################################
-test_release:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .test_release
-
-# Deploy stable (only for releases, version tags)
-#################################################
-package_stable:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .package_stable
+test:jammy:amd64:
+  <<: *amd64_jammy_job
+  extends: .test

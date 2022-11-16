@@ -31,15 +31,12 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required (VERSION 2.8.12)
-
-# Don't set PROJECT_VERSION to empty string when no VERSION is given to project() command.
-if(POLICY CMP0048)
-  cmake_policy(SET CMP0048 OLD)
-endif()
+cmake_minimum_required (VERSION 3.1.0)
 
 project(rc_visard_opencv_example)
+
 include(cmake/project_version.cmake)
+include(GNUInstallDirs)
 
 enable_testing()
 
@@ -53,7 +50,6 @@ endif ()
 
 # - Standard definitions -
 
-add_definitions(-std=c++11)
 add_definitions(-Wall)
 
 # In case of Visual Studio, enable exporting all symbols and disable some
