@@ -45,6 +45,7 @@
 #include <string>
 #include <set>
 #include <unordered_map>
+#include <vector>
 
 /**
  * @brief Comparison function for shared_ptr to ImageReceiverFactory.

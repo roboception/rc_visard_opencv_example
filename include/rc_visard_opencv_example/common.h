@@ -40,7 +40,7 @@
 
 #if CV_MAJOR_VERSION == 2
 #include <opencv2/core/core.hpp>
-#elif CV_MAJOR_VERSION == 3
+#else
 #include <opencv2/core.hpp>
 #endif
 

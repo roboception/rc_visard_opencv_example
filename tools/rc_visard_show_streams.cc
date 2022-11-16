@@ -41,7 +41,7 @@
 #if CV_MAJOR_VERSION == 2
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#elif CV_MAJOR_VERSION == 3
+#else
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #endif
@@ -251,7 +251,7 @@ int main(int argc, char **argv)
     // This is only available beginning with OpenCV 3.0
     auto setWindowTitle = [](const std::string &title)
     {
-#if CV_MAJOR_VERSION == 3
+#if CV_MAJOR_VERSION >= 3
       cv::setWindowTitle(cv_win_name, title);
 #endif
     };
@@ -270,7 +270,7 @@ int main(int argc, char **argv)
     if (show[current_stream] == &disparity && image_set->disparity_img_)
     {
       cv::Mat disp = image_set->disparity_img_->data_;
-      cv::threshold(disp, disp, 1000, 0, CV_THRESH_TOZERO_INV);
+      cv::threshold(disp, disp, 1000, 0, cv::THRESH_TOZERO_INV);
       cv::normalize(disp, disp, 0.0, 1.0, cv::NORM_MINMAX, CV_32FC1);
       cv::imshow(cv_win_name, disp);
       setWindowTitle("disparity");
