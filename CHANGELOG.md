@@ -1,3 +1,11 @@
+## v0.3.0 (2023-11-08)
+
+### Added
+- Added support for color format RGB8 for using SGM producer as well as GigE Vision producer
+
+### Fixed
+- Some refactoring
+
 ## v0.2.1 (2019-04-09)
 
 ### Fixed

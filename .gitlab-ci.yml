@@ -13,12 +13,6 @@ variables:
 #########################
 # Templates using anchors
 #########################
-.amd64_bionic_t: &amd64_bionic_job
-  image: registry.roboception.de/tools/docker_images:bionic-buildimage
-  tags:
-    - amd64
-    - docker
-
 .amd64_focal_t: &amd64_focal_job
   image: registry.roboception.de/tools/docker_images:focal-buildimage
   tags:
@@ -61,10 +55,6 @@ gen_dox:
     - tags
   tags:
     - docs
-
-test:bionic:amd64:
-  <<: *amd64_bionic_job
-  extends: .test
 
 test:focal:amd64:
   <<: *amd64_focal_job
