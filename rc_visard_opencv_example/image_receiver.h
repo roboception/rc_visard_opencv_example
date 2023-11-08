@@ -140,7 +140,7 @@ class IntensityReceiver : public ImageReceiver
         bool enable_color_if_available);
 
   protected:
-    IntensityReceiver(LeftRight left_right, bool color);
+    IntensityReceiver(LeftRight left_right, std::uint64_t format);
 
   private:
     virtual void
@@ -148,7 +148,7 @@ class IntensityReceiver : public ImageReceiver
 
   private:
     LeftRight left_right_;
-    bool color_;
+    std::uint64_t format_;
 };
 
 /**

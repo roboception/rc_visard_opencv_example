@@ -234,12 +234,6 @@ std::unique_ptr<ImageSet> GcReceiver::receive(std::chrono::milliseconds timeout)
     const auto n_parts = buffer->getNumberOfParts();
     for (std::size_t part_idx = 0; part_idx < n_parts; ++part_idx)
     {
-      if (!buffer->getImagePresent(part_idx))
-      {
-        std::cerr << "Buffer does not contain an image" << std::endl;
-        continue;
-      }
-
       // Iterate all receivers and check if one of them is responsible for
       // receiving the image contained in the buffer
       for (const auto &receiver : image_receivers_)

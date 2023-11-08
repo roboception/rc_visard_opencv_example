@@ -55,6 +55,7 @@ constexpr char GC_COMPONENT_ENABLE[] = "ComponentEnable";
 constexpr char GC_PIXEL_FORMAT[] = "PixelFormat";
 constexpr char GC_MONO8[] = "Mono8";
 constexpr char GC_YCBCR411_8[] = "YCbCr411_8";
+constexpr char GC_RGB8[] = "RGB8";
 constexpr char GC_FOCAL_LENGTH_FACTOR[] = "FocalLengthFactor";
 constexpr char GC_BASELINE[] = "Baseline";
 constexpr char GC_SCAN_3D_PRINCIPAL_POINT_U[] = "Scan3dPrincipalPointU";
@@ -147,10 +148,10 @@ void ImageReceiver::grab(std::uint64_t timestamp_ns, ImageSet &set)
   image_list_.removeOld(timestamp_ns);
 }
 
-IntensityReceiver::IntensityReceiver(LeftRight left_right, bool color) :
-    ImageReceiver(color ? YCbCr411_8 : Mono8, 50),
+IntensityReceiver::IntensityReceiver(LeftRight left_right, std::uint64_t format) :
+    ImageReceiver(format, 50),
     left_right_(left_right),
-    color_(color)
+    format_(format)
 {}
 
 std::unique_ptr<IntensityReceiver> IntensityReceiver::enableAndMake(
@@ -179,7 +180,7 @@ std::unique_ptr<IntensityReceiver> IntensityReceiver::enableAndMake(
     { assert(false); }
 
     // enable streaming of color image if it is a color sensor
-    bool color = false;
+    std::uint64_t format=Mono8;
 
     if (enable_color_if_available)
     {
@@ -193,7 +194,18 @@ std::unique_ptr<IntensityReceiver> IntensityReceiver::enableAndMake(
                     GC_YCBCR411_8) != pixel_formats.end())
       {
         rcg::setEnum(node_map, GC_PIXEL_FORMAT, GC_YCBCR411_8, true);
-        color = true;
+        format = YCbCr411_8;
+      }
+      else if (std::find(pixel_formats.begin(), pixel_formats.end(),
+               GC_RGB8) != pixel_formats.end())
+      {
+        rcg::setEnum(node_map, GC_PIXEL_FORMAT, GC_RGB8, true);
+        format = RGB8;
+      }
+      else
+      {
+        rcg::setEnum(node_map, GC_PIXEL_FORMAT, GC_MONO8, true);
+        format = Mono8;
       }
     }
     else
@@ -201,10 +213,11 @@ std::unique_ptr<IntensityReceiver> IntensityReceiver::enableAndMake(
       // Set pixel format to Mono8. This format is available for both
       // monochrome and color sensors.
       rcg::setEnum(node_map, GC_PIXEL_FORMAT, GC_MONO8, true);
+      format = Mono8;
     }
 
     return std::unique_ptr<IntensityReceiver>(
-        new IntensityReceiver(left_right, color));
+        new IntensityReceiver(left_right, format));
   }
   catch (const std::exception &ex)
   {
@@ -230,7 +243,7 @@ void IntensityReceiver::copyToImageSet(const rcg::Image &buffer,
 
   cv::Mat img;
 
-  if (color_)
+  if (format_ == YCbCr411_8)
   {
     // convert a YCbCr411_8 buffer to a BGR cv::Mat
 
@@ -255,6 +268,46 @@ void IntensityReceiver::copyToImageSet(const rcg::Image &buffer,
         // convert YCbCr411_8 to RGB
         rcg::convYCbCr411toQuadRGB(img_row[col_idx].val, buffer_cell_ptr,
                                    col_idx);
+      }
+
+      buffer_row_ptr += buffer_step;
+    }
+
+    // convert RGB to OpenCV specific BGR
+    for (int row_idx = 0; row_idx < height; ++row_idx)
+    {
+      const auto img_row = img.ptr<cv::Vec3b>(row_idx);
+      for (int col_idx = 0; col_idx < width; ++col_idx)
+      {
+        std::swap(img_row[col_idx].val[0], img_row[col_idx].val[2]);
+      }
+    }
+  }
+  else if (format_ == RGB8)
+  {
+    // convert a YCbCr411_8 buffer to a BGR cv::Mat
+
+    assert(buffer.getPixelFormat() == RGB8);
+
+    img = cv::Mat(height, width, CV_8UC3);
+
+    // Width of a row in the Genicam buffer in bytes including padding.
+    // Due to the encoding, 4 pixels are descibed by 6 bytes.
+    const int buffer_step =
+        3 * width + static_cast<int>(buffer.getXPadding());
+
+    // data start pointer
+    auto buffer_row_ptr = buffer.getPixels();
+
+    for (int row_idx = 0; row_idx < height; ++row_idx)
+    {
+      const auto img_row = img.ptr<cv::Vec3b>(row_idx);
+      auto buffer_cell_ptr = buffer_row_ptr;
+      for (int col_idx = 0; col_idx < width; ++col_idx)
+      {
+        img_row[col_idx].val[0]=*buffer_cell_ptr++;
+        img_row[col_idx].val[1]=*buffer_cell_ptr++;
+        img_row[col_idx].val[2]=*buffer_cell_ptr++;
       }
 
       buffer_row_ptr += buffer_step;
